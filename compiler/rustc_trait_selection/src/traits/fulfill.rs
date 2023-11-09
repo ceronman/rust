@@ -9,7 +9,7 @@ use rustc_infer::traits::{PolyTraitObligation, SelectionError, TraitEngine};
 use rustc_middle::mir::interpret::ErrorHandled;
 use rustc_middle::ty::abstract_const::NotConstEvaluatable;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
-use rustc_middle::ty::GenericArgsRef;
+use rustc_middle::ty::{GenericArgsRef, PredicateKind, ClauseKind};
 use rustc_middle::ty::{self, Binder, Const, TypeVisitableExt};
 use std::marker::PhantomData;
 
@@ -37,6 +37,21 @@ impl<'tcx> ForestObligation for PendingPredicateObligation<'tcx> {
 
     fn as_cache_key(&self) -> Self::CacheKey {
         self.obligation.param_env.and(self.obligation.predicate)
+    }
+
+    fn print_obligation(&self) {
+        let predicate_kind = self.obligation.predicate.kind().value;
+        let bound_vars = self.obligation.predicate.kind().bound_vars;
+        match &predicate_kind {
+            PredicateKind::Clause(clause) =>  {
+                match clause {
+                    ClauseKind::Trait(_) => println!("{:?} -- bound_vars: {:?}", clause, bound_vars),
+                    ClauseKind::Projection(_) => println!("{:?} -- bound_vars:  {:?}", clause, bound_vars),
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
     }
 }
 
@@ -111,6 +126,10 @@ impl<'tcx> FulfillmentContext<'tcx> {
 }
 
 impl<'tcx> TraitEngine<'tcx> for FulfillmentContext<'tcx> {
+    fn dump_print(&self, title: &str) {
+        self.predicates.dump_print(title);
+    }
+
     #[inline]
     fn register_predicate_obligation(
         &mut self,

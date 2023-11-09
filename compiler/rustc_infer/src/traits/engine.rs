@@ -7,6 +7,8 @@ use super::FulfillmentError;
 use super::{ObligationCause, PredicateObligation};
 
 pub trait TraitEngine<'tcx>: 'tcx {
+    fn dump_print(&self, title: &str);
+
     /// Requires that `ty` must implement the trait with `def_id` in
     /// the given environment. This trait must not have any type
     /// parameters (except for `Self`).
