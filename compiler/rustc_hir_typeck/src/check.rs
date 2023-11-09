@@ -200,6 +200,9 @@ pub(super) fn check_fn<'a, 'tcx>(
         check_lang_start_fn(tcx, fn_sig, fn_def_id);
     }
 
+    let title = format!("{:?}", fn_sig);
+    fcx.fulfillment_cx.borrow().dump_print(title.as_str());
+
     coroutine_ty
 }
 

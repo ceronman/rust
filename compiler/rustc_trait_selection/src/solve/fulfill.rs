@@ -41,6 +41,9 @@ impl<'tcx> FulfillmentCtxt<'tcx> {
 }
 
 impl<'tcx> TraitEngine<'tcx> for FulfillmentCtxt<'tcx> {
+    fn dump_print(&self, title: &str) {
+        println!("NOT IMPLEMENTED {}", title)
+    }
     #[instrument(level = "debug", skip(self, infcx))]
     fn register_predicate_obligation(
         &mut self,

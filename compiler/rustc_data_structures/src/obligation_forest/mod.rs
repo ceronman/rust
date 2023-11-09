@@ -69,6 +69,8 @@
 //! step, we compress the vector to remove completed and error nodes, which
 //! aren't needed anymore.
 
+#![allow(dead_code)]
+
 use crate::fx::{FxHashMap, FxHashSet};
 
 use std::cell::Cell;
@@ -90,6 +92,7 @@ pub trait ForestObligation: Clone + Debug {
     /// then it must be sound to use the result of processing one obligation
     /// (e.g. success for error) for the other obligation
     fn as_cache_key(&self) -> Self::CacheKey;
+    fn print_obligation(&self, state: NodeState);
 }
 
 pub trait ObligationProcessor {
@@ -247,7 +250,7 @@ impl<O> Node<O> {
 /// Outside of `ObligationForest` methods, nodes should be either `Pending` or
 /// `Waiting`.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-enum NodeState {
+pub enum NodeState {
     /// This obligation has not yet been selected successfully. Cannot have
     /// subobligations.
     Pending,
@@ -390,7 +393,7 @@ impl<O: ForestObligation> ObligationForest<O> {
             .map(|(index, _node)| Error { error: error.clone(), backtrace: self.error_at(index) })
             .collect();
 
-        self.compress(|_| assert!(false));
+        // self.compress(|_| assert!(false));
         errors
     }
 
@@ -492,7 +495,7 @@ impl<O: ForestObligation> ObligationForest<O> {
 
             self.mark_successes();
             self.process_cycles(processor, &mut outcome);
-            self.compress(|obl| outcome.record_completed(obl));
+            // self.compress(|obl| outcome.record_completed(obl));
         }
 
         outcome

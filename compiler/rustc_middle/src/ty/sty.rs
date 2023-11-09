@@ -979,8 +979,8 @@ impl BoundVariableKind {
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 #[derive(HashStable, Lift)]
 pub struct Binder<'tcx, T> {
-    value: T,
-    bound_vars: &'tcx List<BoundVariableKind>,
+    pub value: T,
+    pub bound_vars: &'tcx List<BoundVariableKind>,
 }
 
 impl<'tcx, T> Binder<'tcx, T>

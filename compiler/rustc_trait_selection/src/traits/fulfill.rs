@@ -1,7 +1,7 @@
 use crate::infer::{InferCtxt, TyOrConstInferVar};
 use crate::traits::error_reporting::TypeErrCtxtExt;
 use rustc_data_structures::captures::Captures;
-use rustc_data_structures::obligation_forest::ProcessResult;
+use rustc_data_structures::obligation_forest::{ProcessResult, NodeState};
 use rustc_data_structures::obligation_forest::{Error, ForestObligation, Outcome};
 use rustc_data_structures::obligation_forest::{ObligationForest, ObligationProcessor};
 use rustc_infer::infer::DefineOpaqueTypes;
@@ -10,7 +10,7 @@ use rustc_infer::traits::{PolyTraitObligation, SelectionError, TraitEngine};
 use rustc_middle::mir::interpret::ErrorHandled;
 use rustc_middle::ty::abstract_const::NotConstEvaluatable;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
-use rustc_middle::ty::GenericArgsRef;
+use rustc_middle::ty::{GenericArgsRef, PredicateKind, ClauseKind};
 use rustc_middle::ty::{self, Binder, Const, TypeVisitableExt};
 use std::marker::PhantomData;
 
@@ -38,6 +38,23 @@ impl<'tcx> ForestObligation for PendingPredicateObligation<'tcx> {
 
     fn as_cache_key(&self) -> Self::CacheKey {
         self.obligation.param_env.and(self.obligation.predicate)
+    }
+
+    fn print_obligation(&self, state: NodeState) {
+        let predicate_kind = self.obligation.predicate.kind().value;
+        let bound_vars = self.obligation.predicate.kind().bound_vars;
+        match &predicate_kind {
+            PredicateKind::Clause(clause) =>  {
+                match clause {
+                    ClauseKind::Trait(_) => 
+                        mydebug::print!("#BLACK {:#?} -- bound_vars: {:?} -- State: {:?}", clause, bound_vars, state),
+                    ClauseKind::Projection(_) => 
+                        mydebug::print!("#BLACK {:#?} -- bound_vars:  {:?} -- State: {:?}", clause, bound_vars, state),
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
     }
 }
 
@@ -112,6 +129,10 @@ impl<'tcx> FulfillmentContext<'tcx> {
 }
 
 impl<'tcx> TraitEngine<'tcx> for FulfillmentContext<'tcx> {
+    fn dump_print(&self, title: &str) {
+        self.predicates.dump_print(title);
+    }
+
     #[inline]
     fn register_predicate_obligation(
         &mut self,
@@ -294,6 +315,9 @@ impl<'a, 'tcx> ObligationProcessor for FulfillProcessor<'a, 'tcx> {
         &mut self,
         pending_obligation: &mut PendingPredicateObligation<'tcx>,
     ) -> ProcessResult<PendingPredicateObligation<'tcx>, FulfillmentErrorCode<'tcx>> {
+
+        mydebug::print!("#italic Processing obligtation #end #BLACK {:#?}", pending_obligation);
+
         pending_obligation.stalled_on.truncate(0);
 
         let obligation = &mut pending_obligation.obligation;

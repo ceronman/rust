@@ -311,6 +311,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             // an "opportunistic" trait resolution of any trait bounds on
             // the call. This helps coercions.
             if check_closures {
+                mydebug::print!("\n#blue #bold Type checking params\n");
                 self.select_obligations_where_possible(|_| {})
             }
 

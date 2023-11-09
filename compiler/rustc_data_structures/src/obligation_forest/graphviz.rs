@@ -36,6 +36,20 @@ impl<O: ForestObligation> ObligationForest<O> {
 
         dot::render(&self, &mut gv_file).unwrap();
     }
+
+    #[allow(dead_code)]
+    pub fn dump_print(&self, title: &str) {
+        if self.nodes.is_empty() {
+            mydebug::print!("#bold Obligation forest [{}]: #RED empty", title);
+            return;
+        }
+        mydebug::print!("#bold Obligation forest [{}]:", title);
+        mydebug::print!("#italic BEGIN");
+        for node in &self.nodes {
+            node.obligation.print_obligation(node.state.get());
+        }
+        mydebug::print!("#italic END");
+    }
 }
 
 impl<'a, O: ForestObligation + 'a> dot::Labeller<'a> for &'a ObligationForest<O> {

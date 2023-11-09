@@ -8,6 +8,10 @@ impl<'a> super::ForestObligation for &'a str {
     fn as_cache_key(&self) -> Self::CacheKey {
         self
     }
+
+    fn print_obligation(&self, _state: NodeState) {
+        todo!()
+    }
 }
 
 struct ClosureObligationProcessor<OF, BF, O, E> {
